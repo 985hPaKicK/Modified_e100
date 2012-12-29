@@ -1047,6 +1047,10 @@ class MountService extends IMountService.Stub
                     try {
                         int rc;
                         Slog.w(TAG, "Disabling UMS after cable disconnect");
+
+			if ( SystemProperties.get("persist.sys.usb.config").equals("mass_storage,adb") )
+			    SystemProperties.set("sys.usb.config", "mass_storage,adb");
+
                         for (String path : volumes) {
                             if (getVolumeState(path).equals(Environment.MEDIA_SHARED)) {
                                 doShareUnshareVolume(path, "ums", false);
@@ -1350,6 +1354,12 @@ class MountService extends IMountService.Stub
     }
 
     public void setUsbMassStorageEnabled(boolean enable) {
+
+	if ( enable && SystemProperties.get("sys.usb.config").equals("mass_storage,adb") )
+	    SystemProperties.set("sys.usb.config", "mass_storage");
+	if ( !enable && SystemProperties.get("persist.sys.usb.config").equals("mass_storage,adb") )
+	    SystemProperties.set("sys.usb.config", "mass_storage,adb");
+
         waitForReady();
         validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
 
